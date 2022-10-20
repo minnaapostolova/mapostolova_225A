@@ -1,0 +1,72 @@
+---
+title: "Workshop 2 - Tidyverse"
+author: "Minna Apostolova"
+output: html_notebook
+---
+
+```{r basics}
+# Command + option + I = new R code chunk 
+path.expand('~')
+list.files()
+# Command + Shift runs the code chunk
+# .Rmd files start their path at themselves
+```
+```{r libraries}
+library(tidyverse)
+```
+
+```{r read in weather data}
+# Anything between commas = column
+sf_weather <- read.csv("../raw_data/sf_weather.csv") # "../xxx" goes up in file directory
+head(sf_weather)
+
+unique(sf_weather$SNOW) # $ allows you to pick a column by name
+unique(sf_weather$DATE[sf_weather$SNOW == '0.8']) # Sub-setting in base
+```
+```{r selecting one year of data}
+sf_weather_2021 <- sf_weather %>% # Piping command
+  select( c(DATE, TMAX, TMIN) ) %>% # Selecting 3 columns in a list
+  separate( DATE, c("YEAR", "MONTH", "DAY"), sep = '-', remove = FALSE ) %>%
+  filter(YEAR == '2021')
+```
+
+```{r alternative approach to selecting one year of data}
+filter(separate(select(sf_weather, c(DATE, TMAX, TMIN) ), DATE, c("YEAR", "MONTH", "DAY"), sep = '-', remove = FALSE ), YEAR == '2021' )
+```
+
+```{r adding average data}
+max_temp_month_2021 <- sf_weather_2021 %>% 
+  mutate('TAVG' = (TMAX + TMIN) / 2 ) %>%
+  group_by(MONTH) %>% # adds group to df
+  summarise("MAX_MONTH_TEMP" = max(TAVG) ) # creates a new column with max average temperature
+```
+
+```{r plotting the 2021 data}
+plot(max_temp_month_2021)
+```
+
+```{r weather function}
+yearly_subsetter <- function(year) { #Making the function (use action words)
+  sf_weather %>%
+  select( c(DATE, TMAX, TMIN) ) %>%
+  separate( DATE, c("YEAR", "MONTH", "DAY"), sep = '-', remove = FALSE ) %>%
+  filter(YEAR == year) %>%
+  mutate('TAVG' = (TMAX + TMIN) / 2 ) %>%
+  group_by(MONTH) %>%
+  summarise("MAX_MONTH_TEMP" = max(TAVG) )
+}
+```
+
+```{r 1950 data}
+plot(yearly_subsetter(1950))
+```
+
+```{r for loop for many years}
+
+for (single_year in c("1930", "1931", "1937")) {
+  plot(yearly_subsetter(single_year), main = single_year)
+  
+}
+
+```
+

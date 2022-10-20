@@ -1,0 +1,3 @@
+"0","# Anything between commas = column"
+"0","sf_weather <- read.csv(""../raw_data/sf_weather.csv"") # ""../xxx"" goes up in file directory"
+"0","head(sf_weather)"
